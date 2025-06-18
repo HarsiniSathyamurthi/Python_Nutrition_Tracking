@@ -1,0 +1,60 @@
+START
+    food_nutrition <- DICTIONARY WITH food_name : 
+                        DICTIONARY WITH nutrient : value
+    
+    child_id <- INPUT W/PROMPT "Enter child ID: " AS INTEGER
+    child_name <- INPUT W/PROMPT "Enter child's name: " AS UPPERCASE
+    child_age <- INPUT W/PROMPT "Enter child's age: " AS INTEGER
+    child_weight <- INPUT W/PROMPT "Enter child's weight (kg): " AS FLOAT
+    first_name <- SPLIT AS FIRST WORD OF child_name
+
+    child_profiles[child_id] <- TUPLE OF child_name, child_age, child_weight, first_name
+    
+    OUTPUT "Available food items:"
+    OUTPUT "Breastmilk, Rice, Wheat, Lentils, Chickpeas, Milk, Cheese, Chicken, Fish, Eggs, Carrots, Pumpkin, Banana, Apple"
+    
+    OUTPUT "Enter meal details:"
+    food_item <- INPUT W/PROMPT "Enter food item: " AS CAPITALIZED
+    quantity <- INPUT W/PROMPT "Enter quantity in grams for " + food_item + ": " AS FLOAT
+    
+    IF food_item IN food_nutrition:
+        meal_logs[child_id]["meal"] <- APPEND nutrition calculation
+    ELSE:
+        OUTPUT "Food item unavailable."
+    END IF
+
+    recommended_nutrients <- DICTIONARY WITH nutrient : ideal_value
+    
+    IF meal_logs[child_id]["meal"]:
+        meal <- meal_logs[child_id][meal][0]
+        total_nutrients <- total_nutrients + meal
+    END IF
+    total_nutrients <- DICTIONARY WITH nutrient : actual_value
+
+    OUTPUT "Summary"
+    OUTPUT "Total children records: " + LENGTH OF child_profiles 
+
+    OUTPUT "Meal logs of the child: "
+    OUTPUT DICTIONARY ITEMS OF meal_logs[child_id]
+
+    OUTPUT "Child Details: " + child_profiles[child_id]
+    OUTPUT "Total Nutrients Intake:" + total_nutrients
+
+    MATCH (
+        total_nutrient_one GREATER THAN OR EQUAL TO recommended_nutrient_one, 
+        total_nutrient_two GREATER THAN OR EQUAL TO recommended_nutrient_two, 
+        total_nutrient_three GREATER THAN OR EQUAL TO recommended_nutrient_three 
+        ):
+        CASE (TRUE, TRUE, TRUE) :
+            OUTPUT child_profiles[child_id][3] + " has met the required nutrition levels."
+        CASE (FALSE, _, _) :
+            OUTPUT "Alert! " + child_profiles[child_id][3] + " is undernourished in calories."
+        CASE (_, FALSE, _) :
+            OUTPUT "Alert! " + child_profiles[child_id][3] + " lacks sufficient protein."
+        CASE (_, _, FALSE) :
+            OUTPUT "Alert! " + child_profiles[child_id][3] + " needs more Vitamin A-rich foods."
+        DEFAULT CASE:
+            OUTPUT "Error. Try again"
+    END MATCH
+
+END
